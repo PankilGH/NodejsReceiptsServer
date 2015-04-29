@@ -1,0 +1,55 @@
+Creating_PD_FHIR_JSON_v1
+This document explain how I went about creating PD_FHIR_JSON_v1.
+Note: PD_FHIR_JSON_v1 is more of a research on how to capture the idea of an immunization receipt in FHIR.
+PD_FHIR_JSON_v1 file itself just serves as a FHIR JSON template.
+This file (Creating_PD_FHIR_JSON_v1) explains how PD_FHIR_JSON_v1 is structured.    
+
+Information on FHIR:
+
+FHIR DSTU 2 - http://www.hl7.org/FHIR/2015May/index.html
+
+Note this was FHIR v0.5.0 which is DSTU 2 (April 2, 2015) See: http://www.hl7.org/FHIR/directory.html
+
+The PD_FHIR_JSON_v1 was created using the resources from this location. http://www.hl7.org/FHIR/2015May/resourcelist.html#tabs-2
+
+Here is a simple description of the JSON document and FHIR resources being used:
+
+The first resource is a composition what it says is:
+This is a document of type compositions its subject is #patient1 and the document was authored by #practitioner1 and #device1.
+
+Now the rest or the resources contains additional information that is needed to be communicated in a immunization receipt
+
+- The practitioner resource describes a practitioner/provider in this case this provider is given the reference practioner1.
+
+- patient resource describes the patient
+
+- immunization resource describes the immunization
+
+- I use a ConsentDirective (contract) to capture the consent givers permission to share the information.
+
+- The relatedperson is a person who is related to the patient (in this case they are the consent giver)
+
+- organization (with id = organization1) is the organization that the provider belongs to
+- organization (with id = organization2) is the organization of the vaccine manufacturer
+
+-location is used to capture the service delivery location (the place where provider immunized the patient)
+
+-device is used to capture the information for the device - in this case we can just use it to save the application name. 
+
+
+
+Some more details:
+
+I choose to use a Compositions after reading its definition on FHIR website:
+
+The Composition resource – defines a set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. The composition resource provides the basic structure of a FHIR document. The full content of the document is expressed using a bundle. Compositions will often reference Lists as the focus of particular sections.
+Link:
+http://www.hl7.org/FHIR/2015May/composition.html
+
+
+To reference one resource to another I am using internal references but I am not sure if I am using them correctly implementation wise.
+Link:
+http://www.hl7.org/FHIR/2015May/references.html#Reference
+
+
+

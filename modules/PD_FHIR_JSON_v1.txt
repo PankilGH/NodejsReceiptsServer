@@ -1,0 +1,220 @@
+{
+"resourceType": "Bundle",
+"type": "document",
+"entry": [
+	{
+		"resource": 
+		{
+			"resourceType": "Composition",
+			"date": "<system timestamp>",
+			"status": "final",
+			"subject": [
+			{
+					"reference": "#patient1"
+			}
+			],
+			"author": 
+			[
+				{
+					"reference": "#practitioner1"
+				},
+				{
+					"reference": "#device1"
+				}
+			]
+
+		}
+		
+		
+	},
+	{
+		"resource":
+		{
+			"resourceType": "practitioner",
+			"id": "practitioner1",
+			"identifier": [
+				{
+					"value":"<random number>"
+				}
+			],
+			"name": {
+				"text" : "<the name - use username if no name value>"
+			
+			},
+			"practitionerRole": {
+				"managingOrganization": 
+				{
+					"reference":"#organization1"
+				}
+			}
+		}
+
+	},
+	{
+		"resource":
+		{
+			"resourceType": "patient",
+			"id":"patient1",
+			"identifier" : [
+				{
+					"type":"<string - http://www.hl7.org/implement/standards/fhir/2015May/valueset-identifier-type.html>",
+					"value":"<hcn or other id number>"
+				}
+
+			],
+			"name" : {
+				"text" : "<[First] [Middle or blank] [Last] as one string>"
+			},
+			"telecom" : [
+				{
+					"system":"email",
+					"value":"<string>"
+				},
+				{
+					"system":"phone",
+					"value":"<string>"
+				}
+
+			],
+			"gender" : "<Gender = male | female | other | unknown>",
+			"birthDate": "<date>"
+		}
+
+	},
+	{
+		"resource":
+		{
+			"resourceType": "immunization",
+
+			"date": "<dateTime - http://www.hl7.org/implement/standards/fhir/2015May/datatypes.html#dateTime>",
+			"vaccineType": {
+				"coding": [
+					{
+						"code": "<code>"
+					}
+				],
+				"text": "<string>"
+			},
+			"patient": {
+				"reference": "#patient1"
+			},
+			"wasNotGiven": false,
+
+			"reported": "<boolean false/true>",
+
+			"performer": {
+				"reference": "#practitioner1"
+			},
+			"manufacture": {
+				"reference": "#organization2"
+			},
+			"location": {
+				"reference": "#location1"
+			},
+			"lotNumber": "<string value>",
+			"expirationDate": "<date - http://www.hl7.org/implement/standards/fhir/2015May/datatypes.html#date>",
+			"site": {
+				"coding": [
+					{
+						"code": "<code - http://www.hl7.org/implement/standards/fhir/2015May/valueset-immunization-site.html>"
+					}
+				]
+			},
+			"route": {
+				"coding": [
+					{
+						"code": "<code - http://www.hl7.org/implement/standards/fhir/2015May/valueset-immunization-site.html>"
+					}
+				]
+			},
+			"doseQuantity": { 
+				"value": "<string-value>"
+			}
+
+		}
+
+	},
+	{
+		"resource":
+		{
+			"resourceType": "ConsentDirective",
+			"issued": "<dateTime>",
+			"subject": {
+				"reference": "#patient1"
+			},
+			"signer" : {
+				"type": {
+					"coding" : [
+						{
+							"code": "<code - http://www.hl7.org/implement/standards/fhir/2015May/valueset-contract-signer-type.html>"
+						}
+
+					]
+				},
+				"party": {
+					"reference": "#RelatedPerson1"
+				}
+			}
+			
+		}
+
+	},
+	{
+		"resource":
+		{
+			"resourceType": "RelatedPerson",
+			"id": "RelatedPerson1",
+			"relationship": {
+				"coding": [
+					{
+						"code": "<code - http://www.hl7.org/implement/standards/fhir/2015May/valueset-relatedperson-relationshiptype.html>"
+					}
+				],
+				"text": "<string>"
+
+			},
+			"name": {
+				"text" : "<[First] [Middle or blank] [Last] as one string>"
+			}
+		}
+
+	},
+	{
+		"resource":
+		{
+			"resourceType": "Organization",
+			"id":"organization1",
+			"name":"<provider-org-name>"
+		}
+	},
+	{
+		"resource":
+		{
+			"resourceType": "Organization",
+			"id":"organization2",
+			"name":"<manufacturer-org-name>"
+		}
+	},
+	{
+		"resource":
+		{
+			"resourceType": "location",
+			"id":"location1",
+			"name":"<location-name>"
+		}
+	},
+	{
+		"resource":
+		{
+			"resourceType": "Device",
+			"id": "#device1",
+			"identifier": 
+			[
+				{
+					"value":"<application-name>"
+				}
+			]
+		}
+	}
+	]
+}
