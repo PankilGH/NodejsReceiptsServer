@@ -19,13 +19,22 @@ app.use(multer()); // for parsing multipart/form-data
 
 //app.use('/api', router);
 
-//for dynamic yellow card
+//needed for dynamic yellow card
 var request = require('request');
 var fs = require('fs');
 var https = require('https');
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; //needed for Panorama certificate issue
+
+//receipts
+var Receipt = require('./modules/receipts.js');
 
 
+
+/**************************************************/
+/**************************************************/
+/**************************************************/
+
+//Yellow Card from Cloudant
 app.get('/:id/yc', function(req, res){
 console.log('get - Hey I ran'+req.params.id);
 request.get('http://libertyjavaopal2.mybluemix.net/rest/api/healthrecords/test/query/hcn/fhir2/'+req.params.id, function (error, response, body) {
@@ -38,7 +47,7 @@ request.get('http://libertyjavaopal2.mybluemix.net/rest/api/healthrecords/test/q
 			console.log("The file was saved!");
 			  
 			  	res.writeHead(302, {
-  'Location': '/index.html'
+  'Location': '/yellowcard.html'
   //add other headers here...
 })
 res	.end();
@@ -48,7 +57,7 @@ res	.end();
 	})
 });
 
-
+//Yellow Card from Panorama
 app.get('/pan/:id/yc', function(req, res){
 console.log('Pan/id/yc - get - Hey I ran'+req.params.id);
 // Set the headers
@@ -88,7 +97,7 @@ request(options, function (error, response, body) {
 			console.log("The file was saved!");
 			
 			  res.writeHead(302, {
-			  'Location': '/index.html'
+			  'Location': '/yellowcard.html'
 			  //add other headers here...
 				})
 				res	.end();
@@ -104,22 +113,85 @@ console.log("after response:")
 });
 
 
-app.post('/', function(req, res){
+/**************************************************/
+/**************************************************/
+/**************************************************/
+
+//Connecting to Cloudant
+var db;
+var cloudant;
+var dbCredentials = {
+	dbName : 'originalreceipts'
+};
+
+function initDBConnection() {
+	
+	if(process.env.VCAP_SERVICES) {
+		var vcapServices = JSON.parse(process.env.VCAP_SERVICES);
+		if(vcapServices.cloudantNoSQLDB) {
+			dbCredentials.host = vcapServices.cloudantNoSQLDB[0].credentials.host;
+			dbCredentials.port = vcapServices.cloudantNoSQLDB[0].credentials.port;
+			dbCredentials.user = vcapServices.cloudantNoSQLDB[0].credentials.username;
+			dbCredentials.password = vcapServices.cloudantNoSQLDB[0].credentials.password;
+			dbCredentials.url = vcapServices.cloudantNoSQLDB[0].credentials.url;
+		}
+		console.log('VCAP Services: '+JSON.stringify(process.env.VCAP_SERVICES));
+	}
+	else {
+
+	}
+
+	cloudant = require('cloudant')(dbCredentials.url);
+	
+	//check if DB exists if not create
+	//cloudant.db.create(dbCredentials.dbName, function (err, res) {
+	//	if (err) { console.log('could not create db ', err); }
+    //});
+	db = cloudant.use(dbCredentials.dbName);
+}
+
+initDBConnection();
+
+
+//http://irfhir.mybluemix.net/rest/fhir/receipt/
+//localhost:8000/rest/fhir/receipt
+app.post('/rest/fhir/receipt', function(req, res){
 	console.log('post - Hey I ran');
 	console.log(req.body);
+	
+  fs.writeFile("./data.json", JSON.stringify(req.body), function(err) {
+	if(err) {
+		return console.log(err);
+	}
+	console.log("The file was saved!");
+  });
+			   
 	var jsobj = req.body;
 	//var jsobj = JSON.parse(req.body);
-	console.log(jsobj);
+	//console.log(jsobj);
 	
-	var Receipts = require('./modules/receipts.js');
-	//var r1 = new Receipts();
+	//insert receipts into original receipts db
+	db.insert(req.body, '', function(err, body) {
+  if (!err){
+    console.log(body)
+  }else{
+	  console.log(err)
+  }
+})
+	
+	
+	
+	//console.log(req.body.entry);
+	var r1 = new Receipt.receipt(req.body);
+	r1.resourceType;
+	console.log(r1.readEntry());
 	//r1.resourceType = req.body.id;
 	//r1.type = req.body.fhir;
-	console.log(jsobj.id);
-	console.log(jsobj.fhir);
+	//console.log(jsobj.id);
+	//console.log(jsobj.fhir);
 	
 	res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(jsobj));
+    res.end(JSON.stringify(r1));
 	
 });
 
