@@ -1,1 +1,169 @@
-{"total":5,"entry":[{"link":[{"url":"https://10.69.11.55:9447/cswo-dstu2/immunization/131143"}],"resource":{"reported":false,"text":{"status":"empty"},"patient":{"display":"Anne Selby M 1999-03-14","reference":"https://10.69.11.55:9447/cswo-dstu2/patient/1000032763"},"vaccineType":{"coding":[{"system":"urn:oid:2.16.840.1.113883.2.20.3.282","display":"MMR","code":"61153008"}]},"wasNotGiven":false,"date":"2000-03-14","identifier":[{"system":"urn:oid:2.16.840.1.113883.3.122.1.1.5","value":"131143"}],"meta":{"id":"131143","lastUpdated":"2015-04-27T18:10:06.360-04:00"},"resourceType":"Immunization"}},{"link":[{"url":"https://10.69.11.55:9447/cswo-dstu2/immunization/725783"}],"resource":{"reported":false,"text":{"status":"empty"},"patient":{"display":"Anne Selby M 1999-03-14","reference":"https://10.69.11.55:9447/cswo-dstu2/patient/1000032763"},"vaccineType":{"coding":[{"system":"urn:oid:2.16.840.1.113883.2.20.3.282","display":"Var","code":"108729007"}]},"wasNotGiven":false,"date":"2000-06-14","identifier":[{"system":"urn:oid:2.16.840.1.113883.3.122.1.1.5","value":"725783"}],"meta":{"id":"725783","lastUpdated":"2015-04-27T18:10:06.360-04:00"},"resourceType":"Immunization"}},{"link":[{"url":"https://10.69.11.55:9447/cswo-dstu2/immunization/1942213"}],"resource":{"reported":false,"text":{"status":"empty"},"patient":{"display":"Anne Selby M 1999-03-14","reference":"https://10.69.11.55:9447/cswo-dstu2/patient/1000032763"},"vaccineType":{"coding":[{"system":"urn:oid:2.16.840.1.113883.2.20.3.282","display":"RV1","code":"7811000087105"}]},"wasNotGiven":false,"date":"1999-05-14","identifier":[{"system":"urn:oid:2.16.840.1.113883.3.122.1.1.5","value":"1942213"}],"meta":{"id":"1942213","lastUpdated":"2015-04-27T18:10:06.361-04:00"},"resourceType":"Immunization"}},{"link":[{"url":"https://10.69.11.55:9447/cswo-dstu2/immunization/1942223"}],"resource":{"reported":false,"text":{"status":"empty"},"patient":{"display":"Anne Selby M 1999-03-14","reference":"https://10.69.11.55:9447/cswo-dstu2/patient/1000032763"},"vaccineType":{"coding":[{"system":"urn:oid:2.16.840.1.113883.2.20.3.282","display":"RV1FHIRTest","code":"7811000087105"}]},"wasNotGiven":false,"date":"1999-07-14","identifier":[{"system":"urn:oid:2.16.840.1.113883.3.122.1.1.5","value":"1942223"}],"meta":{"id":"1942223","lastUpdated":"2015-04-27T18:10:06.361-04:00"},"resourceType":"Immunization"}}],"base":"https://10.69.11.55:9447/cswo-dstu2/","language":"en","type":"collection","meta":{"id":"6337565391","lastUpdated":"2015-04-27T18:10:06.359-04:00"},"resourceType":"Bundle"}
+{
+  "resourceType": "Bundle",
+  "meta": {
+    "id": "7703432802",
+    "lastUpdated": "2015-05-03T23:40:47.017-04:00"
+  },
+  "language": "en",
+  "type": "collection",
+  "base": "http://10.69.11.55:9084/cswo-dstu2/",
+  "total": 4,
+  "entry": [
+    {
+      "link": [
+        {
+          "url": "http://10.69.11.55:9084/cswo-dstu2/immunization/106363"
+        }
+      ],
+      "resource": {
+        "resourceType": "Immunization",
+        "meta": {
+          "id": "106363",
+          "lastUpdated": "2015-05-03T23:40:47.017-04:00"
+        },
+        "text": {
+          "status": "empty"
+        },
+        "identifier": [
+          {
+            "system": "urn:oid:2.16.840.1.113883.3.122.1.1.5",
+            "value": "106363"
+          }
+        ],
+        "date": "2004-11-14",
+        "vaccineType": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.2.20.3.282",
+              "code": "61153008",
+              "display": "MMR"
+            }
+          ]
+        },
+        "patient": {
+          "reference": "http://10.69.11.55:9084/cswo-dstu2/patient/1000006683",
+          "display": "Elliot Fong M 2003-11-14"
+        },
+        "wasNotGiven": false,
+        "reported": false
+      }
+    },
+    {
+      "link": [
+        {
+          "url": "http://10.69.11.55:9084/cswo-dstu2/immunization/701283"
+        }
+      ],
+      "resource": {
+        "resourceType": "Immunization",
+        "meta": {
+          "id": "701283",
+          "lastUpdated": "2015-05-03T23:40:47.018-04:00"
+        },
+        "text": {
+          "status": "empty"
+        },
+        "identifier": [
+          {
+            "system": "urn:oid:2.16.840.1.113883.3.122.1.1.5",
+            "value": "701283"
+          }
+        ],
+        "date": "2005-02-14",
+        "vaccineType": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.2.20.3.282",
+              "code": "108729007",
+              "display": "Var"
+            }
+          ]
+        },
+        "patient": {
+          "reference": "http://10.69.11.55:9084/cswo-dstu2/patient/1000006683",
+          "display": "Elliot Fong M 2003-11-14"
+        },
+        "wasNotGiven": false,
+        "reported": false
+      }
+    },
+    {
+      "link": [
+        {
+          "url": "http://10.69.11.55:9084/cswo-dstu2/immunization/1890503"
+        }
+      ],
+      "resource": {
+        "resourceType": "Immunization",
+        "meta": {
+          "id": "1890503",
+          "lastUpdated": "2015-05-03T23:40:47.018-04:00"
+        },
+        "text": {
+          "status": "empty"
+        },
+        "identifier": [
+          {
+            "system": "urn:oid:2.16.840.1.113883.3.122.1.1.5",
+            "value": "1890503"
+          }
+        ],
+        "date": "2004-01-14",
+        "vaccineType": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.2.20.3.282",
+              "code": "7811000087105",
+              "display": "RV1"
+            }
+          ]
+        },
+        "patient": {
+          "reference": "http://10.69.11.55:9084/cswo-dstu2/patient/1000006683",
+          "display": "Elliot Fong M 2003-11-14"
+        },
+        "wasNotGiven": false,
+        "reported": false
+      }
+    },
+    {
+      "link": [
+        {
+          "url": "http://10.69.11.55:9084/cswo-dstu2/immunization/1890513"
+        }
+      ],
+      "resource": {
+        "resourceType": "Immunization",
+        "meta": {
+          "id": "1890513",
+          "lastUpdated": "2015-05-03T23:40:47.018-04:00"
+        },
+        "text": {
+          "status": "empty"
+        },
+        "identifier": [
+          {
+            "system": "urn:oid:2.16.840.1.113883.3.122.1.1.5",
+            "value": "1890513"
+          }
+        ],
+        "date": "2004-03-14",
+        "vaccineType": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.2.20.3.282",
+              "code": "7811000087105",
+              "display": "RV1"
+            }
+          ]
+        },
+        "patient": {
+          "reference": "http://10.69.11.55:9084/cswo-dstu2/patient/1000006683",
+          "display": "Elliot Fong M 2003-11-14"
+        },
+        "wasNotGiven": false,
+        "reported": false
+      }
+    }
+  ]
+}

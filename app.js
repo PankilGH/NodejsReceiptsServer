@@ -34,7 +34,10 @@ var Receipt = require('./modules/receipts.js');
 /**************************************************/
 /**************************************************/
 
-//Yellow Card from Cloudant
+
+//TODO: re-implement this to use Node.js cloudant's services
+
+//Yellow Card from Liberty Java's Cloudant
 app.get('/:id/yc', function(req, res){
 console.log('get - Hey I ran'+req.params.id);
 request.get('http://libertyjavaopal2.mybluemix.net/rest/api/healthrecords/test/query/hcn/fhir2/'+req.params.id, function (error, response, body) {
@@ -104,10 +107,23 @@ request(options, function (error, response, body) {
 			}
 			console.log("The file was saved!");
 			
-			console.log(JSON.parse(body).status);	  
+			  
+			  
+			// cloudant cache service
+			db = cloudant.use(dbNames.dbihrfhir2);
+			db.insert(JSON.parse(body), req.params.id, function(err, body) {
+			if (!err){
+				console.log(body)
+			}
+			else{
+				console.log(err)
+			}
+			})
+
+			  
+			//console.log(JSON.parse(body).status);	  
 			if (JSON.parse(body).status == "error"){
-				//search error		
-				
+				//search error	-- this probably never happens		
 			}else {
 				res.writeHead(302, {
 				'Location': '/yellowcard.html'
@@ -141,13 +157,21 @@ console.log("after response:")
 //Connecting to Cloudant
 var db;
 var cloudant;
+var dbNames = {
+	dbOriginalReceipts : 'originalreceipts',
+	dbPatient : 'patient',
+	dbIHR: 'ihr',
+	dbIR: 'ir',
+	dbProvider: 'provider',
+	dbihrfhir2: 'ihrfhir2'	
+}
 var dbCredentials = {
 	dbName : 'originalreceipts',
 	dbPatient : 'patient',
 	dbIHR: 'ihr',
 	dbIR: 'ir',
 	dbProvider: 'provider',
-	dbfhir2IHR: 'fhir2ihr'
+	dbihrfhir2: 'ihrfhir2'
 };
 
 function initDBConnection() {
@@ -166,7 +190,7 @@ function initDBConnection() {
 	else {
 		/** remove db connect info **/
 
-		
+
 
 		
 		/** remove db connect info **/
@@ -174,11 +198,19 @@ function initDBConnection() {
 
 	cloudant = require('cloudant')(dbCredentials.url);
 	
-	//check if DB exists if not create
-	//cloudant.db.create(dbCredentials.dbName, function (err, res) {
-	//	if (err) { console.log('could not create db ', err); }
-    //});
-	db = cloudant.use(dbCredentials.dbName);
+	//check if DB exists if not create it
+	cloudant.db.list(function (err, all_dbs) {
+		for (var dbName in dbNames){
+			if (dbNames.hasOwnProperty(dbName)) {
+				//console.log(dbNames[dbName]);
+				if (all_dbs.indexOf(dbNames[dbName]) == -1){
+					cloudant.db.create(dbNames[dbName], function (err, res) {
+						if (err) { console.log('could not create db ', err); }
+					});
+				}				
+			}
+		}
+	})		 
 }
 
 initDBConnection();
@@ -204,15 +236,15 @@ app.post('/rest/fhir/receipt', function(req, res){
 	var jsobj = req.body;
 	//var jsobj = JSON.parse(req.body);
 	//console.log(jsobj);
-	
 	//insert receipts into original receipts db
+	db = cloudant.use(dbNames.dbOriginalReceipts);
 	db.insert(req.body, '', function(err, body) {
-  if (!err){
-    console.log(body)
-  }else{
-	  console.log(err)
-  }
-})
+	  if (!err){
+		console.log(body)
+	  }else{
+		  console.log(err)
+	  }
+	})
 	
 	
 	
