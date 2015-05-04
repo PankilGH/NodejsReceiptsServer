@@ -45,20 +45,28 @@ request.get('http://libertyjavaopal2.mybluemix.net/rest/api/healthrecords/test/q
 				return console.log(err);
 			}
 			console.log("The file was saved!");
-			  
-			  	res.writeHead(302, {
-  'Location': '/yellowcard.html'
-  //add other headers here...
-})
-res	.end();
-			  
+			console.log(JSON.parse(body).status);	  
+			if (JSON.parse(body).status == "error"){
+				//search Panorama		
+				res.writeHead(302, {
+				'Location': '/error.html'
+				//add other headers here...
+				})
+				res.end();
+			}else {
+				res.writeHead(302, {
+				'Location': '/yellowcard.html'
+				//add other headers here...
+				})
+				res.end();
+			} 
 		})
 	  }
 	})
 });
 
 //Yellow Card from Panorama
-app.get('/pan/:id/yc', function(req, res){
+app.get('/pan/:id/yc', function (req, res){
 console.log('Pan/id/yc - get - Hey I ran'+req.params.id);
 // Set the headers
 var headers = {
@@ -85,7 +93,7 @@ options.agent = new https.Agent(options);
 console.log("before response:")
 // Start the request
 request(options, function (error, response, body) {
-	console.log("response:"+ "error"+error)
+	console.log("response:"+response.statusCode+ "error"+error)
     if (!error && response.statusCode == 200) {
         // Print out the response body
         console.log(body)
@@ -96,16 +104,29 @@ request(options, function (error, response, body) {
 			}
 			console.log("The file was saved!");
 			
-			  res.writeHead(302, {
-			  'Location': '/yellowcard.html'
-			  //add other headers here...
+			console.log(JSON.parse(body).status);	  
+			if (JSON.parse(body).status == "error"){
+				//search error		
+				
+			}else {
+				res.writeHead(302, {
+				'Location': '/yellowcard.html'
+				//add other headers here...
 				})
-				res	.end();
+				res.end();
+			} 
 		})
 	  }
     }
-	        console.log("body:"+body)
-
+	else{
+	// body = There is no immunization records for the Patient
+	res.writeHead(302, {
+	'Location': '/error.html'
+	//add other headers here...
+	})
+	res.end();
+	}
+	console.log("body:"+body)
 })
 
 console.log("after response:")
@@ -121,7 +142,12 @@ console.log("after response:")
 var db;
 var cloudant;
 var dbCredentials = {
-	dbName : 'originalreceipts'
+	dbName : 'originalreceipts',
+	dbPatient : 'patient',
+	dbIHR: 'ihr',
+	dbIR: 'ir',
+	dbProvider: 'provider',
+	dbfhir2IHR: 'fhir2ihr'
 };
 
 function initDBConnection() {
@@ -138,7 +164,12 @@ function initDBConnection() {
 		console.log('VCAP Services: '+JSON.stringify(process.env.VCAP_SERVICES));
 	}
 	else {
+		/** remove db connect info **/
 
+		
+
+		
+		/** remove db connect info **/
 	}
 
 	cloudant = require('cloudant')(dbCredentials.url);
@@ -157,15 +188,19 @@ initDBConnection();
 //localhost:8000/rest/fhir/receipt
 app.post('/rest/fhir/receipt', function(req, res){
 	console.log('post - Hey I ran');
-	console.log(req.body);
-	
+	//console.log(req.body);
+
+	/*
   fs.writeFile("./data.json", JSON.stringify(req.body), function(err) {
 	if(err) {
 		return console.log(err);
+			console.log("There was an error saving the file");
+	} else {
+		console.log("The file was saved!");
 	}
-	console.log("The file was saved!");
   });
-			   
+	*/
+	
 	var jsobj = req.body;
 	//var jsobj = JSON.parse(req.body);
 	//console.log(jsobj);
@@ -184,7 +219,8 @@ app.post('/rest/fhir/receipt', function(req, res){
 	//console.log(req.body.entry);
 	var r1 = new Receipt.receipt(req.body);
 	r1.resourceType;
-	console.log(r1.readEntry());
+	r1.readEntry();
+	//console.log();
 	//r1.resourceType = req.body.id;
 	//r1.type = req.body.fhir;
 	//console.log(jsobj.id);
