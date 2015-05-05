@@ -104,6 +104,7 @@ var data = d3.json("data4.json", function(error, dat) {
 				}*/
 				//get demographics
 				if (myResource.resourceType == "patient") {
+					console.log(JSON.stringify(myResource));
 				}
 				//get immunization record
 				else if (myResource.resourceType == "Immunization") {

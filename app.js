@@ -37,6 +37,7 @@ var Receipt = require('./modules/receipts.js');
 
 //TODO: re-implement this to use Node.js cloudant's services
 
+/*
 //Yellow Card from Liberty Java's Cloudant
 app.get('/:id/yc', function(req, res){
 console.log('get - Hey I ran'+req.params.id);
@@ -57,21 +58,29 @@ request.get('http://libertyjavaopal2.mybluemix.net/rest/api/healthrecords/test/q
 				})
 				res.end();
 			}else {
-				res.writeHead(302, {
-				'Location': '/yellowcard.html'
+				
+				//res.writeHead(302, {
+				//'Location': '/yellowcard.html'
 				//add other headers here...
-				})
+				//})
+				
 				res.end();
 			} 
 		})
 	  }
 	})
 });
+*/
+
+
+
+
 
 //Yellow Card from Panorama
 app.get('/pan/:id/yc', function (req, res){
-console.log('Pan/id/yc - get - Hey I ran'+req.params.id);
-// Set the headers
+	
+console.log('Pan/id/yc - get - Hey I ran. Looking for HCN: '+req.params.id);
+	// Set the headers
 var headers = {
     'dateTime':       '2015-05-30T09:30:10Z',
     'network.identifier':     '192.168.0.1',
@@ -92,14 +101,12 @@ var options = {
 }
 
 options.agent = new https.Agent(options);
-
-console.log("before response:")
 // Start the request
 request(options, function (error, response, body) {
 	console.log("response:"+response.statusCode+ "error"+error)
     if (!error && response.statusCode == 200) {
         // Print out the response body
-        console.log(body)
+        //console.log(body)
 		if (!error && response.statusCode == 200) {
 		  fs.writeFile("./data4.json", body, function(err) {
 			if(err) {
@@ -107,28 +114,48 @@ request(options, function (error, response, body) {
 			}
 			console.log("The file was saved!");
 			
-			  
-			  
+			// HCN is used as document ID and to search for documents
 			// cloudant cache service
+			// assume Panorama contains the most up to date document
+			// always replace cloudant copy with the Panorama copy
 			db = cloudant.use(dbNames.dbihrfhir2);
-			db.insert(JSON.parse(body), req.params.id, function(err, body) {
-			if (!err){
-				console.log(body)
-			}
-			else{
-				console.log(err)
-			}
-			})
-
+			var docSave = JSON.parse(body);
+			
+			// get document records _rev if it exists
+			db.get(req.params.id, {revs_info: true}, function(error, docbody){
+				if (!error){
+					docSave._rev = docbody._rev;
+					console.log(docSave._rev);
+				}else{
+					//console.log(error);
+				}
+				
+				// insert new document or update existing one
+				db.insert(docSave, req.params.id, function(err, body) {
+				if (!err){
+					console.log(body)
+				}
+				else{
+					console.log(err)
+				}
+				})
+				
+			});
+	  
 			  
 			//console.log(JSON.parse(body).status);	  
 			if (JSON.parse(body).status == "error"){
-				//search error	-- this probably never happens		
+				//search error	-- this probably never happens
+				res.json({status:"error"});
+				res.end();
 			}else {
+				/*
 				res.writeHead(302, {
 				'Location': '/yellowcard.html'
 				//add other headers here...
 				})
+				*/
+				res.json({status:"success"});
 				res.end();
 			} 
 		})
@@ -136,17 +163,18 @@ request(options, function (error, response, body) {
     }
 	else{
 	// body = There is no immunization records for the Patient
+	
+	/*
 	res.writeHead(302, {
 	'Location': '/error.html'
 	//add other headers here...
 	})
+	*/
+	res.json({status:"error"});
 	res.end();
 	}
-	console.log("body:"+body)
+	//console.log("body:"+body);
 })
-
-console.log("after response:")
-
 });
 
 
@@ -190,6 +218,33 @@ function initDBConnection() {
 	else {
 		/** remove db connect info **/
 
+				/*
+		
+		{
+   "cloudantNoSQLDB": [
+      {
+         "name": "Cloudant NoSQL DB-wd",
+         "label": "cloudantNoSQLDB",
+         "plan": "Shared",
+         "credentials": {
+            "username": "2579b3e1-c4ab-45cd-82bf-cdb3514b4e23-bluemix",
+            "password": "394050f8afc6ea00083f8de2851ab42a1f0d78ee8f6e114dbfac3800c2d3c4d2",
+            "host": "2579b3e1-c4ab-45cd-82bf-cdb3514b4e23-bluemix.cloudant.com",
+            "port": 443,
+            "url": "https://2579b3e1-c4ab-45cd-82bf-cdb3514b4e23-bluemix:394050f8afc6ea00083f8de2851ab42a1f0d78ee8f6e114dbfac3800c2d3c4d2@2579b3e1-c4ab-45cd-82bf-cdb3514b4e23-bluemix.cloudant.com"
+         }
+      }
+   ]
+}
+		
+		
+		*/
+		
+		dbCredentials.host = "2579b3e1-c4ab-45cd-82bf-cdb3514b4e23-bluemix.cloudant.com";
+		dbCredentials.port = 443;
+		dbCredentials.user = "2579b3e1-c4ab-45cd-82bf-cdb3514b4e23-bluemix";
+		dbCredentials.password = "394050f8afc6ea00083f8de2851ab42a1f0d78ee8f6e114dbfac3800c2d3c4d2";
+		dbCredentials.url = "https://2579b3e1-c4ab-45cd-82bf-cdb3514b4e23-bluemix:394050f8afc6ea00083f8de2851ab42a1f0d78ee8f6e114dbfac3800c2d3c4d2@2579b3e1-c4ab-45cd-82bf-cdb3514b4e23-bluemix.cloudant.com";
 
 
 		
@@ -262,6 +317,34 @@ app.post('/rest/fhir/receipt', function(req, res){
     res.end(JSON.stringify(r1));
 	
 });
+
+
+app.get('/:id/yc', function(req, res){
+	console.log('get - Hey I ran'+req.params.id);
+	db = cloudant.use(dbNames.dbihrfhir2);
+	// get document records _rev if it exists
+	db.get(req.params.id, {revs_info: true}, function(error, doc){
+		if (!error){
+			fs.writeFile("./data4.json", JSON.stringify(doc), function(err) {
+			if(err) {
+				res.json({status:"error"});
+				return console.log(err);
+				res.end();
+			}else{
+				console.log("The file was saved!"); 
+				res.json({status:"success"});
+				res.end();
+			}
+			});
+		}else{
+			//console.log(error);
+			res.json({status:"error"});
+			res.end();
+		}
+	});
+});
+
+
 
 app.listen(port, function(){
     console.log('Gulp is running my app on PORT: ' + port);
