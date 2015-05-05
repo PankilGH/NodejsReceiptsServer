@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+			form {
+				font-size: 1.25em;
+			}
+			input {
+				width: 200px;
+				height: 20px;
+				font-size: 1.05em;
+			}
+			iframe {
+				border: none;
+			}
+			#divOuter {
+				width: 100%;
+			}
+			#divText {
+				float: left;
+				width: 50%;
+				height: auto;
+				color: #353f5b;
+				display: block;
+			  	margin-left: auto;
+			  	margin-right: auto;
+			}
+			#divImg {
+				float: left;
+				width: 50%;
+				display: block;
+				margin-left: auto;
+				margin-right: auto;
+			}
+			#qrImage{
+				text-align: center;
+				width: 150px;
+				height: auto;
+			}
+			
+			.center-contents {
+				text-align: center;
+			}
+			
+		</style>
+		<script src="./jquery-2.1.1.js"></script>
+		<script>
+			function autoResize(id){
+				var newheight;
+				//var newwidth;
+
+				if(document.getElementById(id)){
+					newheight=document.getElementById(id).contentWindow.document.body.scrollHeight;
+					alert(newheight);
+					//newwidth=document.getElementById(id).contentWindow.document.body.scrollWidth;
+				}
+
+				document.getElementById(id).height= (newheight) + "px";
+				//document.getElementById(id).width= (newwidth) + "px";
+			}
+			
+			function updatePanoramaJSON() {
+			//var hcn = document.getElementById("hcn2").value;
+			var hcn = document.getElementById("hcn1").value;
+			$.get("./pan/"+hcn+"/yc", function(data){
+				var myFrame = document.getElementById('myframe');
+				if (data.status == "error"){
+					myFrame.src = "./error.html";
+				}else{
+					myFrame.src = "./yellowcard.html";
+				}
+				myFrame.reload();
+			});
+			return false;
+			}
+			
+			function updateCloudantJSON() {
+				var hcn = document.getElementById("hcn1").value;
+				$.get("./"+hcn+"/yc", function(data){
+				var myFrame = document.getElementById('myframe');
+				if (data.status == "error"){
+					myFrame.src = "./error.html";
+				}else{
+					myFrame.src = "./yellowcard.html";
+				}
+				myFrame.reload();
+				autoResize("myframe");
+			});
+			return false;
+			}
+		</script>
+	</head>
+<body>
+	<div id="divOuter">
+		<h2 class="center-contents">Yellow Card Search</h2>
+		<div id="divText" class="center-contents">
+			<br	>
+			<input type="text" id="hcn1" placeholder="Health Card Number">
+			<form onsubmit="return updateCloudantJSON();">
+			<!--Search Cloudant\Cache using Health Card Number:<br>-->
+			<input type="submit" value="Search Cloudant\Cache">
+			</form>
+			<form onsubmit="return updatePanoramaJSON();">
+			<!--Search Panorama using Health Card Number:<br>-->
+			<!--<input type="text" id="hcn2" placeholder="Health Card Number">-->
+			<input type="submit" value="Search Panorama">
+			</form>
+			<br	>
+			<a href="./help.html" target="_blank">Help</a>
+		</div>
+		<div id="divImg" class="center-contents	">
+			<img src="./sampleqr.png" id="qrImage"/>
+		</div>
+	</div>
+<iframe src="./startsearch.html" width="100%" height="400px" id="myframe">
+  <p>Your browser does not support iframes.</p>
+</iframe>
+<iframe src="./forecast.html" width="100%" height="400px" id="forecastframe">
+	  <p>Your browser does not support iframes.</p>
+</iframe>
+</body>	
+
+<script>
+//these scripts were used for a single record
+/*
+function redirectCloudant() {
+	var hcn = document.getElementById("hcn1").value;
+    window.location = "/"+hcn+"/yc";
+    return false;
+}
+	
+function redirectPanorama() {
+	var hcn = document.getElementById("hcn2").value;
+    window.location = "/pan/"+hcn+"/yc";
+    return false;
+}
+*/
+</script>
+	
+</html>
