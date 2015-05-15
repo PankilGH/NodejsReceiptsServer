@@ -1,0 +1,273 @@
+{
+  "resourceType": "Bundle",
+  "meta": {
+    "id": "6025157170",
+    "lastUpdated": "2015-05-11T21:39:55.117-04:00"
+  },
+  "language": "en",
+  "type": "collection",
+  "base": "http://10.69.11.55:9084/cswo-dstu2/",
+  "total": 5,
+  "entry": [
+    {
+      "link": [
+        {
+          "url": "http://10.69.11.55:9084/cswo-dstu2/immunization/100103"
+        }
+      ],
+      "resource": {
+        "resourceType": "Immunization",
+        "meta": {
+          "id": "100103",
+          "lastUpdated": "2015-05-11T21:39:55.117-04:00"
+        },
+        "text": {
+          "status": "empty"
+        },
+        "identifier": [
+          {
+            "system": "urn:oid:2.16.840.1.113883.3.122.1.1.5",
+            "value": "100103"
+          }
+        ],
+        "date": "1996-07-14",
+        "vaccineType": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.2.20.3.282",
+              "code": "61153008",
+              "display": "MMR"
+            }
+          ]
+        },
+        "patient": {
+          "reference": "http://10.69.11.55:9084/cswo-dstu2/patient/1000000023",
+          "display": "Lee Errol M 1995-07-14"
+        },
+        "wasNotGiven": false,
+        "reported": false
+      }
+    },
+    {
+      "link": [
+        {
+          "url": "http://10.69.11.55:9084/cswo-dstu2/immunization/695093"
+        }
+      ],
+      "resource": {
+        "resourceType": "Immunization",
+        "meta": {
+          "id": "695093",
+          "lastUpdated": "2015-05-11T21:39:55.118-04:00"
+        },
+        "text": {
+          "status": "empty"
+        },
+        "identifier": [
+          {
+            "system": "urn:oid:2.16.840.1.113883.3.122.1.1.5",
+            "value": "695093"
+          }
+        ],
+        "date": "1996-10-14",
+        "vaccineType": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.2.20.3.282",
+              "code": "108729007",
+              "display": "Var"
+            }
+          ]
+        },
+        "patient": {
+          "reference": "http://10.69.11.55:9084/cswo-dstu2/patient/1000000023",
+          "display": "Lee Errol M 1995-07-14"
+        },
+        "wasNotGiven": false,
+        "reported": false
+      }
+    },
+    {
+      "link": [
+        {
+          "url": "http://10.69.11.55:9084/cswo-dstu2/immunization/1877333"
+        }
+      ],
+      "resource": {
+        "resourceType": "Immunization",
+        "meta": {
+          "id": "1877333",
+          "lastUpdated": "2015-05-11T21:39:55.118-04:00"
+        },
+        "text": {
+          "status": "empty"
+        },
+        "identifier": [
+          {
+            "system": "urn:oid:2.16.840.1.113883.3.122.1.1.5",
+            "value": "1877333"
+          }
+        ],
+        "date": "1995-09-14",
+        "vaccineType": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.2.20.3.282",
+              "code": "7811000087105",
+              "display": "RV1"
+            }
+          ]
+        },
+        "patient": {
+          "reference": "http://10.69.11.55:9084/cswo-dstu2/patient/1000000023",
+          "display": "Lee Errol M 1995-07-14"
+        },
+        "wasNotGiven": false,
+        "reported": false
+      }
+    },
+    {
+      "link": [
+        {
+          "url": "http://10.69.11.55:9084/cswo-dstu2/immunization/1877343"
+        }
+      ],
+      "resource": {
+        "resourceType": "Immunization",
+        "meta": {
+          "id": "1877343",
+          "lastUpdated": "2015-05-11T21:39:55.118-04:00"
+        },
+        "text": {
+          "status": "empty"
+        },
+        "identifier": [
+          {
+            "system": "urn:oid:2.16.840.1.113883.3.122.1.1.5",
+            "value": "1877343"
+          }
+        ],
+        "date": "1995-11-14",
+        "vaccineType": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.2.20.3.282",
+              "code": "7811000087105",
+              "display": "RV1"
+            }
+          ]
+        },
+        "patient": {
+          "reference": "http://10.69.11.55:9084/cswo-dstu2/patient/1000000023",
+          "display": "Lee Errol M 1995-07-14"
+        },
+        "wasNotGiven": false,
+        "reported": false
+      }
+    },
+    {
+      "link": [
+        {
+          "url": "http://10.69.11.55:9084/cswo-dstu2/immunization/3075543"
+        }
+      ],
+      "resource": {
+        "resourceType": "Immunization",
+        "meta": {
+          "id": "3075543",
+          "lastUpdated": "2015-05-11T21:39:55.119-04:00"
+        },
+        "text": {
+          "status": "empty"
+        },
+        "contained": [
+          {
+            "resourceType": "Practitioner",
+            "meta": {
+              "id": "5986",
+              "lastUpdated": "2015-05-11T21:39:55.132-04:00"
+            },
+            "identifier": [
+              {
+                "system": "urn:oid:2.16.840.1.113883.3.122.1.1.5",
+                "value": "5986"
+              }
+            ],
+            "name": {
+              "text": "Smith Brittany ",
+              "family": [
+                "Smith"
+              ],
+              "given": [
+                "Brittany"
+              ]
+            },
+            "gender": "unknown"
+          }
+        ],
+        "identifier": [
+          {
+            "system": "urn:oid:2.16.840.1.113883.3.122.1.1.5",
+            "value": "3075543"
+          }
+        ],
+        "date": "2006-07-13",
+        "vaccineType": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.2.20.3.282",
+              "code": "8771000087109",
+              "display": "HB"
+            }
+          ]
+        },
+        "patient": {
+          "reference": "http://10.69.11.55:9084/cswo-dstu2/patient/1000000023",
+          "display": "Lee Errol M 1995-07-14"
+        },
+        "wasNotGiven": false,
+        "reported": false,
+        "performer": {
+          "reference": "http://10.69.11.55:9084/cswo-dstu2/practitioner/5986",
+          "display": "{\"identifier\":[{\"use\":\"Official\",\"system\":\"urn:oid:2.16.840.1.113883.3.122.1.1.5\",\"value\":\"5986\"}],\"name\":{\"text\":\"Brittany Smith\",\"family\":[\"Smith\"],\"given\":[\"Brittany\"]},\"telecom\":[{\"value\":\"\"},{\"value\":\"(905)791-7800\"}],\"role\":[{\"system\":\"urn:oid:2.16.840.1.113883.5.111\",\"code\":\"RN\",\"display\":\"Registered Nurse\"}]}"
+        },
+        "lotNumber": "125490",
+        "site": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.122.3.66.11",
+              "code": "JiON_AL",
+              "display": "Arm Lt"
+            }
+          ]
+        },
+        "route": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.122.3.66.11",
+              "code": "JiON_AL",
+              "display": "Arm Lt"
+            }
+          ]
+        },
+        "doseQuantity": {
+          "value": 1,
+          "units": "mL"
+        },
+        "explanation": {
+          "reason": [
+            {
+              "coding": [
+                {
+                  "system": "urn:oid:2.16.840.1.113883.3.122.3.254.7.11",
+                  "code": "HIRISK",
+                  "display": "High Risk"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,26 +1,4 @@
 <!DOCTYPE html>
-
-<!--
-This code needs a lot of clean up. (seperation of CSS, Javascripts, logic - redsign)
-Overall code refactoring is needed and a review of how things should be implemented.  
-It's only purpose is to show (demo) how an immunization health record can be read and rendered on the screen.
-
-May not work in all browsers and operating systems.
-Development was done on a Mac OS X using Chrome - it should work on that type of configuraiton.
-I noticed it doesn't look as good on Windows (Chrome, and IE).  Doesn't work at all in Firefox was using Linux.
-
-You can pass data to this page using
-./yellowcard?hcn=#&db=X
-# = health card number
-X = which db to search. can be one of:  panorama, cache, or both
-Anything other than panorama or cache will cause it to use both.
-The search page simpally invokes this page with a appropiate parameters based on user entry.
-
-This method is used by the "search" page (index.html in this case) to invoke the view "yellowcard.html" (this page).
-This is done to is seperated functionalities such as searching from view/display of data.  
-- Pankil
--->
-
 <meta charset="utf-8">
 <style> /* set the CSS */
 	body 
@@ -81,42 +59,6 @@ This is done to is seperated functionalities such as searching from view/display
 		margin-left: auto; 
 		margin-right: auto;
 	}
-	#agenttable {
-		text-align: center;
-		width: 100%;
-		background-color: #F4F4F4;
-		display: none;	
-	}
-	#diseasetable {
-		width: 100%;
-		background-color: #F4F4F4;	
-		display: none;
-	}
-	#forecastbuttons{
-	}
-	#forecast {
-		overflow-y: scroll;
-		max-height: 15vh;
-		height: 15vh;
-		margin: 0 auto;
-	}
-	
-	.agentDiseaseName {
-		width: 50%;
-	}
-	.overdue {
-		width: 50%;
-		color: red;
-	}
-	.due {
-		width: 50%;
-		color: #E59400;
-	}
-	.forecastRow {
-		width: 100%;
-	}
-	
-	
 </style>
 <body>
 	
@@ -129,13 +71,7 @@ This is done to is seperated functionalities such as searching from view/display
 			</div>
 			<div id="qrcode" class="innerDiv">
 			</div>
-			<div class="innerDiv">
-				<div id="forecastbuttons">		
-				</div>
-			
-				<div id="forecast">
-					<!-- contains forecaster -->
-				</div>	
+			<div id="forecast" class="innerDiv">
 			</div>
 		</div>
 		<div id="tableDiv">
@@ -154,11 +90,6 @@ This is done to is seperated functionalities such as searching from view/display
 	
 <!-- used to generate dynamic qr code -->
 <script src="./qrcode.js"></script>
-	
-<!-- Jquery for forecaster table -->
-<script src="./jquery-2.1.1.js"></script>
-
-
 
 <script>
 	var startTime = performance.now();
@@ -300,19 +231,20 @@ var diseaseList = //function(key){
 // The function uses xmlHttp.open and this needs to be changed
 // for now keeping this to speed up development - code needs to be refactored properly to fix this
 // Get the immunization data
-function httpGet(theUrl) {
+function httpGet(theUrl)
+{
 	console.log(theUrl);
     var xmlHttp = null;
     xmlHttp = new XMLHttpRequest();
     xmlHttp.open( "GET", theUrl, false );
     xmlHttp.send( null );
-	//console.log(xmlHttp.responseText);
+	console.log(xmlHttp.responseText);
     return xmlHttp.responseText;
 }
 	
 function getData(hcn, dbSearch){
 	
-	var server = "http://hcnyc.mybluemix.net";
+	var server = "http://localhost:8000";
 	var location = "/"+hcn+"/yc";
 	if (dbSearch == "cache") {
 		location = "/cache/"+hcn+"/yc";
@@ -325,201 +257,11 @@ function getData(hcn, dbSearch){
 	}
 	var result = JSON.parse(httpGet(server+location));
 	var data = result;
-	data.immunizationRecommendation = genRecommendations(data);
-	
-	
+	data.immunizationRecommendation = {recommendation: [{ date: new Date(), vaccineType: "MMR", forecastStatus: "due"}, 
+											 { date: new Date(), vaccineType: "RV1", forecastStatus: "overdue"}]} 
 	return data;
 }
-
 	
-/**
-* Genereates the data for immunization recommendation based on the ihr
-* The immunization forecaster logic is a pseudo implementation
-* if a person only has one immunization they are overdue
-* if a person has two of same immunization they are due
-* if a person has more than two they are not forecasted
-*/
-function genRecommendations(ihrData){
-	var ihrDataEntries = ihrData.entry;
-	
-	//used to keep count of how many time a certian vaccine has been given
-	//vaccines are keys their counts are values
-	var recCount = {};
-	
-	
-	// populate the recommendation count
-	for (var entryIndex in ihrDataEntries) {
-		var currentEntry = ihrDataEntries[entryIndex];
-		var currentResource = currentEntry.resource;
-		if (currentResource.resourceType == "Immunization"){
-			for (vaccineCodeIndex in currentResource.vaccineType.coding) {
-				var currentVacCode = currentResource.vaccineType.coding[vaccineCodeIndex];
-				if (recCount[currentVacCode.display] >= 1){
-					recCount[currentVacCode.display] = recCount[currentVacCode.display] + 1;
-					//console.log(JSON.stringify(recCount));
-				}
-				else {					
-					recCount[currentVacCode.display] = 1;
-				}
-			}
-		}
-	}
-	
-	var recArray = [];
-	var icounter = 0;
-	// populate the recommendation array
-	for (var recIndex in recCount) {
-		if (recCount[recIndex] == 1){
-			//overdue
-			recArray[icounter] = {date: new Date(), vaccineType: recIndex, forecastStatus: "Overdue"};
-		}
-		else if (recCount[recIndex] == 2){
-			//overdue
-			recArray[icounter] = {date: new Date(), vaccineType: recIndex, forecastStatus: "Due"};
-		}else{
-		}
-		
-		icounter += 1;
-	}
-	//console.log(JSON.stringify({recommendation:recArray}));
-	return 	{recommendation:recArray};
-}
-	
-// The table generation function
-function tabulate(datArray, columns) {
-	var table = d3.select("body").select("#tableDiv").append("table"),
-		thead = table.append("thead").append("tr"),
-		tbody = table.append("tbody");
-
-	//append custom table headers
-	thead.insert("th").attr("style", "width:100px").attr("id", "date")
-		.append("p").attr("class", "h1").text("Date")
-		.append("p").attr("class", "h2").text("(yyyy-mm-dd)");
-	thead.insert("th").attr("style", "width:150px").attr("id", "vaccName")
-		.append("p").attr("class", "h1").text("Vaccine brand name")
-		.append("p").attr("class", "h2").text("(must be completed)");
-
-	//create object of current table to create nested rows
-	thead.insert("th").attr("id", "vaccineList").attr("colspan", 16).attr("style", "width:370px");
-
-	//Add Row above Vaccine names
-	d3.select("#vaccineList").append("tr").append("td")
-		.attr("colspan", 16)
-		.attr("style", "background-color:rgba(211,211,211, 0.6)")
-			.text("Vaccine protects against the following diseases:");
-
-	// Add Vaccine name headers as svg
-	vaccineNames.forEach(function (element, index, array) {
-		d3.select("#vaccineList").append("th").attr("style", "width:20px").append("svg")
-			.attr("width", 20).attr("height", 120)
-				.append("text")
-					.attr("x", 0)
-					.attr("y", 0)
-					.attr("fill", "black")
-					.attr("transform", "translate(15,120)rotate(-90)")
-						.text(element);
-	});
-
-	//Add Other and Lot Number header
-	thead.insert("th").attr("id", "other").attr("style", "width:150px")
-		.append("p").attr("class", "h1").text("Other")
-		.append("p").attr("class", "h2").text("(specify)");
-	thead.insert("th").attr("id", "lotNumber").attr("style", "width:150px")
-		.append("p").attr("class", "h1").text("Lot Number");
-
-	//Add Transcribed header as svg
-	thead.insert("th").attr("id", "transcribed").attr("style", "width:20px").append("svg")
-		.attr("width", 20).attr("height", 160)
-			.append("text")
-				.attr("x", 40)
-				.attr("y", 10)
-				.attr("fill", "black")
-				.attr("transform", "translate(5, 200)rotate(-90)")
-					.text("Transcribed");
-
-	//Add Provider header
-	thead.insert("th").attr("id", "provider").attr("style", "width:150px")
-		.append("p").attr("class", "h1").text("Health care provider");
-
-	// create a row for each object in the data
-   var rows = tbody.selectAll("tr")
-		.data(datArray)
-		.enter()
-		.append("tr").attr("style", function(d, i){
-		//get row index and return color
-		if (i % 2 == 0)
-			return "background-color:rgba(211,211,211, 0.6)";
-		else
-			return "background-color:white";
-		}
-		);
-
-
-	var vacAgent;
-	// create a cell in each row for each column
-	var cells = rows.selectAll("tr")
-		.data(function(row) {
-			return columns.map(function(column) {
-				return {column: column, value: row[column]};
-			});
-		})
-		.enter()
-		.append("td")
-		.attr("style", "font-family: Arial") // sets the font style
-		.each(function (d) { //add data or svg graphic to each cell based on data value.
-
-
-			if (d.column == "Vaccine Brand")
-			{
-				vacAgent = d.value;
-			}
-
-			var cel = d3.select(this);
-
-			//if d is disease column
-			if (diseaseCol.indexOf(d.column) > -1)
-			{
-				//create array of diseases for vaccine
-				var temp = diseaseList;
-				//diseaseList(vaccInfo.text);
-				currentDiseaseMap = diseaseMap[vacAgent];
-				//diseaseMap = diseaseList[vaccInfo.text];
-
-				if (currentDiseaseMap.indexOf(d.column) > -1)
-				//if (d.value == "*") //add svg circle if vaccine is administered (denoted with asterisk)
-				{
-					cel.append("svg")
-					.attr("width", 20).attr("height", 20)
-					.append("circle")
-						.attr("r", 5).attr("stroke", "black").attr("stroke-width", 2)
-						.attr("transform", "translate(10, 10)")
-						.attr("fill", "black");
-				}
-			}
-			else if (d.column == "Transcribed")
-			{
-				if (d.value == "Y") // add svg checkmark if record is transcribed
-				{
-					cel.append("svg")
-						.attr("width", 20).attr("height", 20)
-						.append("path")
-							.attr("d", "M20 2 l -12 12 -5 -4 -2 4 7 6 12-18z") //M30 3l-14 14-5-5-4 4 10 10 15-25z
-							.attr("fill", "#000000");
-				}
-			}
-/*			else if (d.value == "N") //cell is blank if record is not transcribed
-			{
-				cel.html("");
-			}*/
-			else //add data of record into cell as text.
-			{
-				cel.html(function(d) {return d.value;});
-			}
-		});
-
-	return table;
-}
-
 //var data = d3.json("data4.json", function(error, dat) {
 	//parse data if needed
 	var datArray = [];
@@ -533,6 +275,8 @@ function tabulate(datArray, columns) {
 	var dbSearch = location.search.substr(location.search.indexOf("db=")+("db=".length));
 	dat = getData(hcnFromUrl, dbSearch);
 
+	
+	
 	//alert(location.search);
 	//alert(location.search.substr(location.search.indexOf("=")+1));
 			
@@ -582,8 +326,6 @@ function tabulate(datArray, columns) {
 							if (myResource.patient) {
 								if (!patientProcessed){
 									//console.log(JSON.stringify(myResource.patient));
-									
-									//Add qr code and demographics information
 									var name = myResource.patient.display.match("[A-Za-z ]*");
 									var dob = myResource.patient.display.replace(name, "");
 									document.getElementById("name").textContent = "Name: " + name;
@@ -592,8 +334,7 @@ function tabulate(datArray, columns) {
 									var qrData = {name: name, dob: dob, hcn: hcnFromUrl};
 									var qrcode = new QRCode("qrcode");
 									qrcode.makeCode(JSON.stringify(qrData));
-									patientProcessed = true;
-									
+									patientProcessed = true;	
 								}
 							}
 
@@ -632,154 +373,141 @@ function tabulate(datArray, columns) {
 				datLen = datLen - 1;
 			}*/
 
-		//set up the forecaser buttons
-		var agentsForecast = document.createElement("BUTTON");
-		agentsForecast.textContent = "Forecast By Agent";
-		agentsForecast.setAttribute("onclick", displayAgents);
-				agentsForecast.style = "float: left;";
+		// The table generation function
+		function tabulate(datArray, columns) {
+			var table = d3.select("body").select("#tableDiv").append("table"),
+				thead = table.append("thead").append("tr"),
+				tbody = table.append("tbody");
 
-		agentsForecast.onclick = displayAgents;
-		var diseaseForecast = document.createElement("BUTTON");
-		//diseaseForecast.setAttribute("onclick", displayDisease);
-		diseaseForecast.onclick = displayDisease;
-		diseaseForecast.setAttribute("style", "float: right;");
-		diseaseForecast.style = "float: right;";
-		diseaseForecast.textContent = "Forecast By Disease";
-		
-		//var forecastHeading = document.createElement("H4");
-		//forecastHeading.appendChild(document.createTextNode("Immunization Forecast"));
+			//append custom table headers
+			thead.insert("th").attr("style", "width:100px").attr("id", "date")
+				.append("p").attr("class", "h1").text("Date")
+				.append("p").attr("class", "h2").text("(yyyy-mm-dd)");
+			thead.insert("th").attr("style", "width:150px").attr("id", "vaccName")
+				.append("p").attr("class", "h1").text("Vaccine brand name")
+				.append("p").attr("class", "h2").text("(must be completed)");
 
-		//document.getElementById("forecastbuttons").appendChild(forecastHeading);
-		document.getElementById("forecastbuttons").appendChild(agentsForecast);
-		document.getElementById("forecastbuttons").appendChild(diseaseForecast);
-		
-		var ftable = document.createElement('TABLE');
-		document.getElementById("forecast").appendChild(ftable);
-		ftable.id = "agenttable";
-	
-		
-		//Fake logic - 
-		//converts the immunization recommendations of by agent to by disease
-		//currently there is no other way to generate this data - no Panorama webservice - yet.
-		var disRec = [];
-		if (dat.immunizationRecommendation.recommendation) {
-			var agentRec = dat.immunizationRecommendation.recommendation;
-			var icounter = 0;
-			for (r1 in agentRec){
-				//loop thru the agent recommendation list, find list of matching diseases
-				var vt = agentRec[r1].vaccineType;
-				for (x in diseaseMap[vt]){
-					//set the status for these disease, probably should have done this using
-					//disRec.diseaseMap[vt][x] = agentRec[r1].forecastStatus
-					//since some agents may share same diseases
-					disRec[icounter]={disease : diseaseMap[vt][x], forecastStatus :agentRec[r1].forecastStatus};
-					icounter += 1;
+			//create object of current table to create nested rows
+			thead.insert("th").attr("id", "vaccineList").attr("colspan", 16).attr("style", "width:370px");
+
+			//Add Row above Vaccine names
+			d3.select("#vaccineList").append("tr").append("td")
+				.attr("colspan", 16)
+				.attr("style", "background-color:rgba(211,211,211, 0.6)")
+					.text("Vaccine protects against the following diseases:");
+
+			// Add Vaccine name headers as svg
+			vaccineNames.forEach(function (element, index, array) {
+				d3.select("#vaccineList").append("th").attr("style", "width:20px").append("svg")
+					.attr("width", 20).attr("height", 120)
+						.append("text")
+							.attr("x", 0)
+							.attr("y", 0)
+							.attr("fill", "black")
+							.attr("transform", "translate(15,120)rotate(-90)")
+								.text(element);
+			});
+
+			//Add Other and Lot Number header
+			thead.insert("th").attr("id", "other").attr("style", "width:150px")
+				.append("p").attr("class", "h1").text("Other")
+				.append("p").attr("class", "h2").text("(specify)");
+			thead.insert("th").attr("id", "lotNumber").attr("style", "width:150px")
+				.append("p").attr("class", "h1").text("Lot Number");
+
+			//Add Transcribed header as svg
+			thead.insert("th").attr("id", "transcribed").attr("style", "width:20px").append("svg")
+				.attr("width", 20).attr("height", 160)
+					.append("text")
+						.attr("x", 40)
+						.attr("y", 10)
+						.attr("fill", "black")
+						.attr("transform", "translate(5, 200)rotate(-90)")
+							.text("Transcribed");
+
+			//Add Provider header
+			thead.insert("th").attr("id", "provider").attr("style", "width:150px")
+				.append("p").attr("class", "h1").text("Health care provider");
+
+			// create a row for each object in the data
+		   var rows = tbody.selectAll("tr")
+				.data(datArray)
+				.enter()
+				.append("tr").attr("style", function(d, i){
+				//get row index and return color
+				if (i % 2 == 0)
+					return "background-color:rgba(211,211,211, 0.6)";
+				else
+					return "background-color:white";
 				}
-			}
-			//	console.log(JSON.stringify(disRec));
+				);
+
+
+			var vacAgent;
+			// create a cell in each row for each column
+			var cells = rows.selectAll("tr")
+				.data(function(row) {
+					return columns.map(function(column) {
+						return {column: column, value: row[column]};
+					});
+				})
+				.enter()
+				.append("td")
+				.attr("style", "font-family: Arial") // sets the font style
+				.each(function (d) { //add data or svg graphic to each cell based on data value.
+
+
+					if (d.column == "Vaccine Brand")
+					{
+						vacAgent = d.value;
+					}
+
+					var cel = d3.select(this);
+
+					//if d is disease column
+					if (diseaseCol.indexOf(d.column) > -1)
+					{
+						//create array of diseases for vaccine
+						var temp = diseaseList;
+						//diseaseList(vaccInfo.text);
+						currentDiseaseMap = diseaseMap[vacAgent];
+						//diseaseMap = diseaseList[vaccInfo.text];
+
+						if (currentDiseaseMap.indexOf(d.column) > -1)
+						//if (d.value == "*") //add svg circle if vaccine is administered (denoted with asterisk)
+						{
+							cel.append("svg")
+							.attr("width", 20).attr("height", 20)
+							.append("circle")
+								.attr("r", 5).attr("stroke", "black").attr("stroke-width", 2)
+								.attr("transform", "translate(10, 10)")
+								.attr("fill", "black");
+						}
+					}
+					else if (d.column == "Transcribed")
+					{
+						if (d.value == "Y") // add svg checkmark if record is transcribed
+						{
+							cel.append("svg")
+								.attr("width", 20).attr("height", 20)
+								.append("path")
+									.attr("d", "M20 2 l -12 12 -5 -4 -2 4 7 6 12-18z") //M30 3l-14 14-5-5-4 4 10 10 15-25z
+									.attr("fill", "#000000");
+						}
+					}
+		/*			else if (d.value == "N") //cell is blank if record is not transcribed
+					{
+						cel.html("");
+					}*/
+					else //add data of record into cell as text.
+					{
+						cel.html(function(d) {return d.value;});
+					}
+				});
+
+			return table;
 		}
-		
-		displayAgents();
-		
-		//set up the forecaster tables
-function displayAgents(){	
-		// by agent
-		if (dat.immunizationRecommendation.recommendation) {
-			ftable.parentNode.removeChild(ftable);
-
-			var recom = dat.immunizationRecommendation.recommendation;
-
-			var agentTable = document.createElement('TABLE');
-			ftable = agentTable;
-			var agentTableBody = document.createElement('TBODY');
-			var headingRow = document.createElement('TR');
-			var agentTableAgent = document.createElement('TD');
-			var agentTableStatus = document.createElement('TD');
-			
-			agentTable.id = "agenttable";
-			agentTableAgent.textContent = "Agent";
-			agentTableStatus.textContent = "Status";
-			agentTable.appendChild(agentTableBody);
-			headingRow.appendChild(agentTableAgent);
-			headingRow.appendChild(agentTableStatus);
-			agentTableBody.appendChild(headingRow);
-
-			for (var r in recom) {
-				var tr = document.createElement('TR');
-				agentTableBody.appendChild(tr);
-				var td1 = document.createElement('TD');
-				var td2 = document.createElement('TD');
-				td1.className = "agentDiseaseName";
-				if (recom[r].forecastStatus == "Overdue"){
-					td2.className = "overdue";
-				}else{
-					td2.className = "due";
-				}
-				td1.textContent = recom[r].vaccineType;
-				td2.textContent = recom[r].forecastStatus;
-				tr.appendChild(td1);
-				tr.appendChild(td2);
-			}
-			document.getElementById("forecast").appendChild(agentTable);
-
-			var myElement = document.querySelector("#agenttable");
-			myElement.style.display = "inline-table";
-
-		}
-}
-		
-function displayDisease(){
-		// by disease
-		if (dat.immunizationRecommendation.recommendation) {
-			ftable.parentNode.removeChild(ftable);
-
-			
-			var recom = disRec;
-			var agentTable = document.createElement('TABLE');
-			ftable = agentTable;
-			
-			var agentTableBody = document.createElement('TBODY');
-			var headingRow = document.createElement('TR');
-			var agentTableAgent = document.createElement('TD');
-			var agentTableStatus = document.createElement('TD');
-			
-			agentTable.id = "diseasetable";
-			agentTableAgent.textContent = "Disease";
-			agentTableStatus.textContent = "Status";
-			agentTable.appendChild(agentTableBody);
-			headingRow.appendChild(agentTableAgent);
-			headingRow.appendChild(agentTableStatus);
-			agentTableBody.appendChild(headingRow);
-
-			for (var r in recom) {
-				var tr = document.createElement('TR');				
-				agentTableBody.appendChild(tr);
-				var td1 = document.createElement('TD');
-				var td2 = document.createElement('TD');
-				td1.className = "agentDiseaseName";
-				if (recom[r].forecastStatus == "Overdue"){
-					td2.className = "overdue";
-				}else{
-					td2.className = "due";
-				}
-				td1.textContent = recom[r].disease;
-				td2.textContent = recom[r].forecastStatus;
-				tr.appendChild(td1);
-				tr.appendChild(td2);
-
-			}
-			document.getElementById("forecast").appendChild(agentTable);
-
-			var myElement = document.querySelector("#diseasetable");
-			myElement.style.display = "inline-table";
-		}
-}
-
-
-		
-		
-		
-		var yellowCard = tabulate(datArray, colNames);
+			var yellowCard = tabulate(datArray, colNames);
 		document.getElementById("searchstatus").textContent = "This is the yellow card for client with health card number: " + hcnFromUrl + ".  This data is from " + dat.dataFrom + ".";
 
 		//});
@@ -796,7 +524,10 @@ function displayDisease(){
 	var endTime = performance.now();
 	var time = endTime - startTime;
 	document.getElementById("time").textContent = "Search time: " + Number(time/1000).toFixed(4) + " seconds\n";
-
+	/*
+	"Start: " + startTime/1000 + " seconds\n" +
+	"End: " + endTime/1000 + " seconds\n"
+	*/
 </script>
 
 </body>

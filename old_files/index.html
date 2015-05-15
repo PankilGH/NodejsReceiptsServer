@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+			form {
+				font-size: 1.25em;
+			}
+			input {
+				width: 200px;
+				height: 20px;
+				font-size: 1.05em;
+			}
+			iframe {
+				border: 1;
+			}
+			#divOuter {
+				width: 100%;
+			}
+			#divText {
+				float: left;
+				width: 100%;
+				height: auto;
+				color: #353f5b;
+				display: block;
+			  	margin-left: auto;
+			  	margin-right: auto;
+			}
+			.center-contents {
+				text-align: center;
+			}
+			
+		</style>
+		<script src="./jquery-2.1.1.js"></script>
+		<script>			
+			
+			function searchPanorama() {
+				var hcn = Number(document.getElementById("hcn1").value);
+				var myFrame = document.getElementById('myframe');
+				myFrame.src = "./yellowcard.html?hcn="+hcn+"&db=panorama";
+				return false; 
+			}
+			
+			function searchCloudant() {
+				var hcn = Number(document.getElementById("hcn1").value);
+				var myFrame = document.getElementById('myframe');
+				myFrame.src = "./yellowcard.html?hcn="+hcn+"&db=cache";
+				return false;
+			}
+			
+			function searchBoth() {
+				var hcn = Number(document.getElementById("hcn1").value);
+				var myFrame = document.getElementById('myframe');
+				myFrame.src = "./yellowcard.html?hcn="+hcn+"&db=both";
+				return false;
+			}
+			
+			function AdjustIframeHeightOnLoad() { 
+				document.getElementById("myframe").height = document.getElementById("myframe").contentWindow.document.body.scrollHeight + "px"; 
+			}
+		</script>
+	</head>
+<body>
+	<div id="divOuter">
+		<h2 class="center-contents">Yellow Card Search</h2>
+		<div id="divText" class="center-contents">
+			<input type="text" id="hcn1" placeholder="Health Card Number">
+			<form onsubmit="return searchCloudant();">
+			<input type="submit" value="Search Cloudant\Cache">
+			</form>
+			<form onsubmit="return searchPanorama();">
+			<input type="submit" value="Search Panorama">
+			</form>
+			<form onsubmit="return searchBoth();">
+			<input type="submit" value="Search 1.Cache 2.Panorama">
+			</form>
+			<br	>
+			<a href="./help.html" target="_blank">Help</a>
+		</div>
+	</div>
+		<iframe src="./startsearch.html" width="100%" height="500px" id="myframe" scrolling="yes" onload="AdjustIframeHeightOnLoad();">
+  			<p>Your browser does not support iframes.</p>
+		</iframe>
+
+</body>	
+
+<script>
+//these scripts were used for a single record
+/*
+function redirectCloudant() {
+	var hcn = document.getElementById("hcn1").value;
+    window.location = "/"+hcn+"/yc";
+    return false;
+}
+	
+function redirectPanorama() {
+	var hcn = document.getElementById("hcn2").value;
+    window.location = "/pan/"+hcn+"/yc";
+    return false;
+}
+*/
+</script>
+	
+</html>
