@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style> /* set the CSS */
+	body 
+	{ 
+		font: 12px Arial;
+		padding: 2px;
+		display: block; 
+		margin-left: auto; 
+		margin-right: auto;
+	}
+	table
+	{
+		border: 1px solid black;
+		table-layout: fixed;
+		border-collapse: collapse;
+		margin-left:auto;
+		margin-right:auto;
+		width: 1112px;
+		//width: auto;
+				background-color: #FFFF75;
+
+	}
+	th, td
+	{
+		border: 1px solid black;
+		height: 20px;
+		padding: 1px;
+		text-align: center;
+		word-break: break-all;
+	}
+	.h1{
+		font: 14px Arial;
+		font-weight: bold;
+	}
+	.h2{
+		font: 12px Arial;
+	}
+	#outerDiv {
+		margin: 10px;
+		position: relative;
+		bottom: 1;
+	}
+	#innderDivGroup {
+		position: relative;
+		bottom: 1;
+		float: none;
+	}
+	.innerDiv {
+		font: 14px helvetica;
+		float: left;
+		margin: 1.5%;
+		width: 30%;
+		
+	}
+	img {
+		width: 25%; 
+		display: block; 
+		margin-left: auto; 
+		margin-right: auto;
+	}
+</style>
+<body>
+	
+	<div id="outerDiv">
+		<div id="innerDivGroup">
+			<div class="innerDiv">
+				<p id="name"></p>
+				<p id="dob"></p>
+				<p id="hcn"></p>
+			</div>
+			<div id="qrcode" class="innerDiv">
+			</div>
+			<div id="forecast" class="innerDiv">
+			</div>
+		</div>
+		<div id="tableDiv">
+			<!-- contains the yellow card -->
+		</div>
+		<div>
+			<p id="time" style="text-align: center; font: 14px helvetica;"></p>
+			<p id="searchstatus" style="text-align: center; font: 14px helvetica;"></p>	
+		</div>
+
+	</div>		
+	
+	
+<!-- load the d3.js library -->    
+<script src="http://d3js.org/d3.v3.min.js"></script>
+	
+<!-- used to generate dynamic qr code -->
+<script src="./qrcode.js"></script>
+
+<script>
+	var startTime = performance.now();
+// Parse the date / time
+var parseDate = d3.time.format("%d-%b-%y").parse;
+
+//setup arrays for Header Labels
+var diseaseCol = ["Diphtheria", "Tetanus", "Pertussis", "Poliomyelitis", "Invasive haemophilus influenzae disease", "Pneumococcal disease", "Rotavirus enteritis",
+			"Measles", "Mumps", "Rubella", "Varicella", "Meningococcal disease", "Type B viral hepatitis", "Human papilloma virus infection", "Influenza", "Type A viral hepatitis"];
+			
+var vaccineNames = ["Diphtheria", "Tetanus", "Pertussis", "Polio", "Hib", "Pneomococcal", "Rotavirus", "Measles", "Mumps", "Rubella", "Varicella", "Meningococcal", "Hepatitis B", "HPV", "Influenza", "Hepatitis A"];
+
+var colNames = ["Date", "Vaccine Brand", "Diphtheria", "Tetanus", "Pertussis", "Poliomyelitis", "Invasive haemophilus influenzae disease", "Pneumococcal disease", "Rotavirus enteritis",
+			"Measles", "Mumps", "Rubella", "Varicella", "Meningococcal disease", "Type B viral hepatitis", "Human papilloma virus infection", "Influenza", "Type A viral hepatitis", "Other", "Lot Number", "Transcribed", "Provider"];
+
+//Empty object array
+function blankObj() {
+	var blankDataObj = {"Date" : " ", "Vaccine Brand" : " ", "Diphtheria" : " ", "Tetanus" : "", "Pertussis" : "", "Poliomyelitis" : "", "Invasive haemophilus influenzae disease" : "", "Pneumococcal disease" : "",
+				"Rotavirus enteritis" : " ", "Measles" : "", "Mumps" : "", "Rubella" : "", "Varicella" : "", "Meningococcal disease" : "", "Type B viral hepatitis" : "", "Human papilloma virus infection" : "",
+				"Influenza" : " ", "Type A viral hepatitis" : " ", "Other" : "", "Lot Number" : "", "Transcribed" : "", "Provider" : " "};//, "VacAgent" : ""};
+	return blankDataObj;
+	};
+//get disease mapping
+var diseaseMap;
+var currentDiseaseMap = [];
+var diseaseList = //function(key){
+	//d3.json("disMap1.json", function(error, dis){
+	//d3.json("disMap1.json", function(error, dis){
+	//hard coded - replace with webservice call
+	diseaseMap = {
+"DTaP-HB-IPV-Hib" : ["Diphtheria", "Invasive haemophilus influenzae disease", "Pertussis", "Poliomyelitis", "Tetanus", "Type B viral hepatitis"],
+"DTaP-IPV-Hib" : ["Diphtheria", "Invasive haemophilus influenzae disease", "Pertussis", "Poliomyelitis", "Tetanus"],
+"DPTP-Hib" : ["Diphtheria", "Invasive haemophilus influenzae disease", "Pertussis", "Poliomyelitis", "Tetanus"],
+"DPT-HB-Hib" : ["Diphtheria", "Invasive haemophilus influenzae disease", "Pertussis", "Tetanus", "Type B viral hepatitis"],
+"DPTP" : ["Diphtheria", "Pertussis", "Poliomyelitis", "Tetanus"],
+"DPT-HB" : ["Diphtheria", "Pertussis", "Tetanus", "Type B viral hepatitis"],
+"DTaP-IPV" : ["Diphtheria", "Pertussis", "Poliomyelitis", "Tetanus"],
+"DPT-Hib" : ["Diphtheria", "Invasive haemophilus influenzae disease", "Pertussis", "Tetanus"],
+"MMR-Var" : ["Measles", "Mumps", "Rubella", "Varicella"],
+"DPT-IPV" : ["Diphtheria", "Pertussis", "Poliomyelitis", "Tetanus"],
+"Tdap-IPV" : ["Diphtheria", "Pertussis", "Poliomyelitis", "Tetanus"],
+"Tdap" : ["Diphtheria", "Pertussis", "Tetanus"],
+"MMR" : ["Measles", "Mumps", "Rubella"],
+"Td-IPV" : ["Diphtheria", "Poliomyelitis", "Tetanus"],
+"DPT" : ["Diphtheria", "Pertussis", "Tetanus"],
+"DTaP" : ["Diphtheria", "Pertussis", "Tetanus"],
+"DT-IPV" : ["Diphtheria", "Poliomyelitis", "Tetanus"],
+"men-AC unspecified" : ["Meningococcal disease"],
+"DT" : ["Diphtheria", "Tetanus"],
+"D-Hib" : ["Diphtheria", "Invasive haemophilus influenzae disease"],
+"d" : ["Diphtheria"],
+"Td" : ["Diphtheria", "Tetanus"],
+"MR" : ["Measles", "Rubella"],
+"men-p-AC unspecified" : ["Meningococcal disease"],
+"HA-Typh-I" : ["Type A viral hepatitis", "Typhoid fever"],
+"Chol-Ecol-O" : ["Traveler's diarrhea"],
+"ap" : ["Pertussis"],
+"HAHB" : ["Type A viral hepatitis", "Type B viral hepatitis"],
+"T-IPV" : ["Poliomyelitis", "Tetanus"],
+"Men-P-ACYW135" : ["Meningococcal disease"],
+"pneu-unspecified" : ["Pneumococcal disease"],
+"pertussis-unspecified" : ["Pertussis"],
+"d-unspecifiedpertussis-unspecifiedTp-unspecified" : ["Diphtheria", "Pertussis", "Tetanus ", "Poliomyeltis"],
+"Men-C-C" : ["Meningococcal disease"],
+"d-unspecifiedT" : ["Diphtheria", "Tetanus"],
+"d-unspecifiedap-unspecifiedT" : ["Diphtheria", "Pertussis", "Tetanus"],
+"d-unspecifiedTp-unspecified" : ["Diphtheria", "Tetanus ", "Poliomyeltis"],
+"Pneu-C-7" : ["Pneumococcal disease"],
+"H1N1-unspecified" : ["Influenza"],
+"RabIg" : ["Rabies"],
+"HA" : ["Type A viral hepatitis"],
+"men-p-A unspecified" : ["Meningococcal disease"],
+"BIG-IV" : ["Foodborne botulism"],
+"men-unspecified" : ["Meningococcal disease"],
+"Anth" : ["Anthrax"],
+"Mu" : ["Mumps"],
+"HB" : ["Type B viral hepatitis"],
+"Pneu-C-10" : ["Pneumococcal disease"],
+"HB (dialysis)" : ["Type B viral hepatitis"],
+"Pneu-P-23" : ["Pneumococcal disease"],
+"HBIg" : ["Type B viral hepatitis"],
+"R" : ["Rubella"],
+"HB-unspecified" : ["Type B viral hepatitis"],
+"RSVAb" : ["Respiratory Syncytial Virus"],
+"Hib" : ["Invasive haemophilus influenzae disease"],
+"men-c-unspecified" : ["Meningococcal disease"],
+"HPV-2" : ["Human papilloma virus infection"],
+"BCG vaccine" : ["Tuberculosis "],
+"HPV-4" : ["Human papilloma virus infection"],
+"men-p-unspecified" : ["Meningococcal disease"],
+"ap-unspecified " : ["Pertussis"],
+"d-unspecified" : ["Diphtheria"],
+"Chol" : ["Cholera"],
+"d-unspecifiedap-unspecifiedTp-unspecified" : ["Diphtheria", "Pertussis", "Tetanus ", "Poliomyeltis"],
+"RV1" : ["Rotavirus enteritis"],
+"OPV" : ["Poliomyelitis"],
+"RV5" : ["Rotavirus enteritis"],
+"PLAG" : ["Plague"],
+"T" : ["Tetanus"],
+"Pneu-C-13" : ["Pneumococcal disease"],
+"Batx " : ["Foodborne botulism"],
+"pneu-c-unspecified" : ["Pneumococcal disease"],
+"Zoster" : ["Herpes zoster"],
+"pneu-p-unspecified" : ["Pneumococcal disease"],
+"M" : ["Measles"],
+"p-unspecified" : ["Poliomyelitis"],
+"CMVIg" : ["Cytomegalovirus disease"],
+"Rab" : ["Rabies"],
+"men-ACYW135 unspecified" : ["Meningococcal disease"],
+"rota-unspecified" : ["Rotavirus enteritis"],
+"Men-B" : ["Meningococcal disease"],
+"d-unspecifiedpertussis-unspecifiedT" : ["Diphtheria", "Pertussis", "Tetanus "],
+"Men-C-ACYW135" : ["Meningococcal disease"],
+"Sma" : ["Smallpox"],
+"Typh-O" : ["Typhoid fever"],
+"TBE" : ["Tickborne encephalitis"],
+"Var" : ["Varicella"],
+"Datx" : ["Diphtheria"],
+"wP" : ["Pertussis"],
+"hpv-unspecified" : ["Human papilloma virus infection"],
+"Tig" : ["Tetanus"],
+"Ig" : ["Measles"],
+"Typh-I" : ["Typhoid fever"],
+"Inf" : ["Influenza"],
+"typh-unspecified" : ["Typhoid fever"],
+"inf-unspecified" : ["Influenza"],
+"VarIg" : ["Varicella"],
+"IPV" : ["Poliomyelitis"],
+"YF" : ["Yellow Fever"],
+"JE" : ["Japanese encephalitis "],
+"Tp-unspecified" : ["Tetanus ", "Poliomyeltis"],
+"LYM" : ["Lyme disease"]
+}
+	//});
+//	diseaseMap = diseaseMap[key];
+//	};
+
+
+// The function uses xmlHttp.open and this needs to be changed
+// for now keeping this to speed up development - code needs to be refactored properly to fix this
+// Get the immunization data
+function httpGet(theUrl)
+{
+	console.log(theUrl);
+    var xmlHttp = null;
+    xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", theUrl, false );
+    xmlHttp.send( null );
+	console.log(xmlHttp.responseText);
+    return xmlHttp.responseText;
+}
+	
+function getData(hcn, dbSearch){
+	
+	var server = "http://localhost:8000";
+	var location = "/"+hcn+"/yc";
+	if (dbSearch == "cache") {
+		location = "/cache/"+hcn+"/yc";
+	}
+	else if (dbSearch == "panorama") {
+		location = "/panorama/"+hcn+"/yc";
+	}
+	else {
+		location = "/"+hcn+"/yc";
+	}
+	var result = JSON.parse(httpGet(server+location));
+	var data = result;
+	data.immunizationRecommendation = {recommendation: [{ date: new Date(), vaccineType: "MMR", forecastStatus: "due"}, 
+											 { date: new Date(), vaccineType: "RV1", forecastStatus: "overdue"}]} 
+	return data;
+}
+	
+//var data = d3.json("data4.json", function(error, dat) {
+	//parse data if needed
+	var datArray = [];
+	//for (k in dat) {
+	
+	
+	// Get the data from the server
+	//find the hcn to search for
+	var hcnFromUrl = location.search.substring(location.search.indexOf("=")+1, location.search.indexOf("&"));
+	//find which database to search in
+	var dbSearch = location.search.substr(location.search.indexOf("db=")+("db=".length));
+	dat = getData(hcnFromUrl, dbSearch);
+
+	
+	
+	//alert(location.search);
+	//alert(location.search.substr(location.search.indexOf("=")+1));
+			
+	if (dat.status == "success") {
+		
+		// Process only off data has success status
+					var k_data = dat;//[k];
+					var entries = k_data.entry;
+					var patientProcessed = false;
+					for (e in entries) {
+						var isRecord = false;
+						var newObj = new blankObj();
+
+						var myEnt = entries[e];
+						var myResource = myEnt.resource;
+						//get provider
+						/*
+						if (myResource.resourceType == "practitioner") {
+							var practName = myResource.name;
+							newObj["Provider"] = practName.text;
+							//dat.Provider = practName.text;
+						}*/
+						//get demographics
+						if (myResource.resourceType == "patient") {
+							console.log(JSON.stringify(myResource));
+
+						}
+						//get immunization record
+						else if (myResource.resourceType == "Immunization") {
+							//var newObj = blankDataObj;
+							newObj["Date"] = myResource["date"];
+							//dat.date1 = parseDate(myResource.date);
+							//var vaccInfo = myResource.vaccineType;
+							var coding = myResource.vaccineType.coding;
+							for (c in coding)
+							{
+								var code = coding[c];
+								var vaccInfo = code.display;
+								newObj["Vaccine Brand"] = vaccInfo;
+								//newObj["VacAgent"] = vaccInfo;
+								newObj["Lot Number"] = myResource.lotNumber;
+								//newObj["Lot Number"] = code.code;
+								//dat["Vaccine Brand"] = vaccInfo.text;
+								//dat["Lot Number"] = myResource.lotNumber;
+							}
+
+							if (myResource.patient) {
+								if (!patientProcessed){
+									//console.log(JSON.stringify(myResource.patient));
+									var name = myResource.patient.display.match("[A-Za-z ]*");
+									var dob = myResource.patient.display.replace(name, "");
+									document.getElementById("name").textContent = "Name: " + name;
+									document.getElementById("dob").textContent = "Date of Birth: " + dob;
+									document.getElementById("hcn").textContent = "Health Card Number: " + hcnFromUrl;
+									var qrData = {name: name, dob: dob, hcn: hcnFromUrl};
+									var qrcode = new QRCode("qrcode");
+									qrcode.makeCode(JSON.stringify(qrData));
+									patientProcessed = true;	
+								}
+							}
+
+							var containers = myResource.contained;
+							for (c in containers)
+							{
+								var containe = containers[c];
+								if (containe.resourceType == "Practitioner")
+								{
+									var practName = containe.name;
+									newObj["Provider"] = practName.text;
+								}
+							}
+
+							datArray.push(newObj);
+							//isRecord = true;
+						}
+						else{
+						}
+						if (isRecord) {
+						datArray.push(newObj);
+						}
+					}
+			//}
+
+		/*    dat.forEach(function(d) {
+				d.date1 = parseDate(d.Date);    //  <= Change to date1
+			});*/
+			//Get count of empty rows to add
+		/*	var datLen = 25 - (dat.length % 25);
+
+			//add empty data objects to data array
+			while (datLen > 0)
+			{
+				dat.push(blankDataObj);
+				datLen = datLen - 1;
+			}*/
+
+		// The table generation function
+		function tabulate(datArray, columns) {
+			var table = d3.select("body").select("#tableDiv").append("table"),
+				thead = table.append("thead").append("tr"),
+				tbody = table.append("tbody");
+
+			//append custom table headers
+			thead.insert("th").attr("style", "width:100px").attr("id", "date")
+				.append("p").attr("class", "h1").text("Date")
+				.append("p").attr("class", "h2").text("(yyyy-mm-dd)");
+			thead.insert("th").attr("style", "width:150px").attr("id", "vaccName")
+				.append("p").attr("class", "h1").text("Vaccine brand name")
+				.append("p").attr("class", "h2").text("(must be completed)");
+
+			//create object of current table to create nested rows
+			thead.insert("th").attr("id", "vaccineList").attr("colspan", 16).attr("style", "width:370px");
+
+			//Add Row above Vaccine names
+			d3.select("#vaccineList").append("tr").append("td")
+				.attr("colspan", 16)
+				.attr("style", "background-color:rgba(211,211,211, 0.6)")
+					.text("Vaccine protects against the following diseases:");
+
+			// Add Vaccine name headers as svg
+			vaccineNames.forEach(function (element, index, array) {
+				d3.select("#vaccineList").append("th").attr("style", "width:20px").append("svg")
+					.attr("width", 20).attr("height", 120)
+						.append("text")
+							.attr("x", 0)
+							.attr("y", 0)
+							.attr("fill", "black")
+							.attr("transform", "translate(15,120)rotate(-90)")
+								.text(element);
+			});
+
+			//Add Other and Lot Number header
+			thead.insert("th").attr("id", "other").attr("style", "width:150px")
+				.append("p").attr("class", "h1").text("Other")
+				.append("p").attr("class", "h2").text("(specify)");
+			thead.insert("th").attr("id", "lotNumber").attr("style", "width:150px")
+				.append("p").attr("class", "h1").text("Lot Number");
+
+			//Add Transcribed header as svg
+			thead.insert("th").attr("id", "transcribed").attr("style", "width:20px").append("svg")
+				.attr("width", 20).attr("height", 160)
+					.append("text")
+						.attr("x", 40)
+						.attr("y", 10)
+						.attr("fill", "black")
+						.attr("transform", "translate(5, 200)rotate(-90)")
+							.text("Transcribed");
+
+			//Add Provider header
+			thead.insert("th").attr("id", "provider").attr("style", "width:150px")
+				.append("p").attr("class", "h1").text("Health care provider");
+
+			// create a row for each object in the data
+		   var rows = tbody.selectAll("tr")
+				.data(datArray)
+				.enter()
+				.append("tr").attr("style", function(d, i){
+				//get row index and return color
+				if (i % 2 == 0)
+					return "background-color:rgba(211,211,211, 0.6)";
+				else
+					return "background-color:white";
+				}
+				);
+
+
+			var vacAgent;
+			// create a cell in each row for each column
+			var cells = rows.selectAll("tr")
+				.data(function(row) {
+					return columns.map(function(column) {
+						return {column: column, value: row[column]};
+					});
+				})
+				.enter()
+				.append("td")
+				.attr("style", "font-family: Arial") // sets the font style
+				.each(function (d) { //add data or svg graphic to each cell based on data value.
+
+
+					if (d.column == "Vaccine Brand")
+					{
+						vacAgent = d.value;
+					}
+
+					var cel = d3.select(this);
+
+					//if d is disease column
+					if (diseaseCol.indexOf(d.column) > -1)
+					{
+						//create array of diseases for vaccine
+						var temp = diseaseList;
+						//diseaseList(vaccInfo.text);
+						currentDiseaseMap = diseaseMap[vacAgent];
+						//diseaseMap = diseaseList[vaccInfo.text];
+
+						if (currentDiseaseMap.indexOf(d.column) > -1)
+						//if (d.value == "*") //add svg circle if vaccine is administered (denoted with asterisk)
+						{
+							cel.append("svg")
+							.attr("width", 20).attr("height", 20)
+							.append("circle")
+								.attr("r", 5).attr("stroke", "black").attr("stroke-width", 2)
+								.attr("transform", "translate(10, 10)")
+								.attr("fill", "black");
+						}
+					}
+					else if (d.column == "Transcribed")
+					{
+						if (d.value == "Y") // add svg checkmark if record is transcribed
+						{
+							cel.append("svg")
+								.attr("width", 20).attr("height", 20)
+								.append("path")
+									.attr("d", "M20 2 l -12 12 -5 -4 -2 4 7 6 12-18z") //M30 3l-14 14-5-5-4 4 10 10 15-25z
+									.attr("fill", "#000000");
+						}
+					}
+		/*			else if (d.value == "N") //cell is blank if record is not transcribed
+					{
+						cel.html("");
+					}*/
+					else //add data of record into cell as text.
+					{
+						cel.html(function(d) {return d.value;});
+					}
+				});
+
+			return table;
+		}
+			var yellowCard = tabulate(datArray, colNames);
+		document.getElementById("searchstatus").textContent = "This is the yellow card for client with health card number: " + hcnFromUrl + ".  This data is from " + dat.dataFrom + ".";
+
+		//});
+	}
+	else{
+		document.getElementById("searchstatus").textContent = "Cannot find client with health card number " + hcnFromUrl + ".";
+		//    display: none;
+		document.getElementById("name").style.display = "none";									
+		document.getElementById("dob").style.display = "none";
+		document.getElementById("hcn").style.display = "none";
+		
+	}
+	
+	var endTime = performance.now();
+	var time = endTime - startTime;
+	document.getElementById("time").textContent = "Search time: " + Number(time/1000).toFixed(4) + " seconds\n";
+	/*
+	"Start: " + startTime/1000 + " seconds\n" +
+	"End: " + endTime/1000 + " seconds\n"
+	*/
+</script>
+
+</body>

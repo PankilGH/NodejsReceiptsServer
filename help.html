@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<style>
+body {
+	font-size: 1.25em;
+}
+input {
+	width: 200px;
+	height: 20px;
+	font-size: 1.05em;
+}
+
+</style>	
+<body>
+	<p>Use the search filters to search for a yellow card.</p>
+	<p>Here is a list of sample Health Card Numbers:</p>
+	<p>Cloudant sample Health Card Numbers:</p>
+	<p>2484584624, 6025157170, 7703432802, 6337565391</p>
+	<p>Click the link below to reset the cloudant cache to remove all documents except for:</p>
+	<p>2484584624, 6025157170, 7703432802, 6337565391</p>
+	<button onclick="cleanCache()">Clean (Cloudant) Cache</button>
+	<p>Panorama sample Health Card Numbers (DEV53 environment):</p>
+	<p>2484584624, 6025157170, 7703432802, 6337565391, 1201883137, 9438283807, 3419060870, 6023936864, 1023993387</p> 
+	<p>2484584624 has the most data for demo purposes.</p>
+</body>
+
+<script>
+
+	function cleanCache(){
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", "http://hcnyc.mybluemix.net/cache/clean", true);
+		xhr.send(null);
+	}
+	
+</script>
+	
+</html>
